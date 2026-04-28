@@ -286,11 +286,8 @@ export default function App() {
   const selEvts = sel ? getEv(sel) : [];
   const Mo = MONTHS[month];
 
-  // ── CELL HEIGHT based on max events in month
-  const maxInCell = Math.max(...cells.map(d => d ? getEv(d).length : 0), 1);
-  const cellH = isMobile
-    ? Math.max(64, Math.min(90, 52 + maxInCell * 16))
-    : Math.max(80, Math.min(120, 60 + maxInCell * 18));
+  // ── CELL HEIGHT — fixed, proporsional
+  const cellH = isMobile ? 72 : 90;
 
   return (
     <div style={{background:P.raisin,color:P.timber,fontFamily:"'DM Sans',system-ui,sans-serif",
@@ -310,16 +307,16 @@ export default function App() {
 
       {/* ── HEADER ── */}
       <div style={{background:P.raisin2,borderBottom:`1px solid ${P.raisin3}`,
-        padding:isMobile?"10px 16px 8px":"12px 20px 10px",flexShrink:0}}>
+        padding:isMobile?"8px 14px 6px":"10px 20px 8px",flexShrink:0}}>
         {/* top row */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"6px"}}>
           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-            <span style={{fontSize:"20px"}}>{Mo.e}</span>
+            <span style={{fontSize:"18px"}}>{Mo.e}</span>
             <div>
               <div style={{fontFamily:"'Playfair Display',Georgia,serif",
-                fontSize:isMobile?"20px":"22px",fontWeight:"600",
+                fontSize:isMobile?"18px":"20px",fontWeight:"600",
                 color:P.timber,lineHeight:1,letterSpacing:"-0.01em"}}>{Mo.n}</div>
-              <div style={{fontSize:"10px",color:P.grullo,marginTop:"2px"}}>{Mo.s} · {year}</div>
+              <div style={{fontSize:"9.5px",color:P.grullo,marginTop:"1px"}}>{Mo.s} · {year}</div>
             </div>
           </div>
           <div style={{display:"flex",gap:"4px",alignItems:"center"}}>
@@ -355,7 +352,7 @@ export default function App() {
 
       {/* ── DAY LABELS ── */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",
-        padding:"6px 8px 2px",background:P.raisin2,flexShrink:0,
+        padding:"5px 8px 4px",background:P.raisin2,flexShrink:0,
         borderBottom:`1px solid ${P.raisin3}`}}>
         {DAYS.map((d,i)=>(
           <div key={d} style={{textAlign:"center",fontSize:"10px",fontWeight:"500",
@@ -364,7 +361,7 @@ export default function App() {
       </div>
 
       {/* ── CALENDAR GRID ── */}
-      <div style={{flex:1,overflow:"auto",padding:"4px 6px 80px"}}>
+      <div style={{flex:1,overflow:"auto",padding:"3px 6px 72px"}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:"2px"}}>
           {cells.map((d,i)=>{
             const ev = getEv(d);
@@ -373,57 +370,60 @@ export default function App() {
             const allDone = ev.length>0&&ev.every(e=>prg(e).done===e.tasks.length);
             return (
               <div key={i} className={d?"cell":""} onClick={()=>pickDay(d)}
-                style={{minHeight:`${cellH}px`,borderRadius:"8px",padding:"5px 4px",
+                style={{height:`${cellH}px`,borderRadius:"8px",padding:"4px 3px",
                   background:isSel?P.raisin3:"transparent",
                   border:`1px solid ${isSel?P.grullo+"44":"transparent"}`,
                   cursor:d?"pointer":"default",position:"relative",
-                  transition:"background .12s"}}>
+                  transition:"background .12s",overflow:"hidden"}}>
                 {d&&<>
-                  {/* date number */}
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"center",
-                    width:isMobile?"22px":"24px",height:isMobile?"22px":"24px",
-                    borderRadius:"50%",margin:"0 auto 3px",
+                  {/* date number — compact, left-aligned like iOS */}
+                  <div style={{
+                    width:"20px",height:"20px",borderRadius:"50%",
+                    margin:"0 auto 3px",
+                    display:"flex",alignItems:"center",justifyContent:"center",
                     background:isTod?P.garnet:"transparent"}}>
-                    <span style={{fontSize:isMobile?"10.5px":"11px",fontWeight:isTod?"600":"400",
-                      color:isTod?"#fff":ev.length?P.timber:P.grullo}}>
+                    <span style={{fontSize:"10px",fontWeight:isTod?"600":"400",
+                      color:isTod?"#fff":ev.length?P.timber:P.grullo+"99",
+                      lineHeight:1}}>
                       {d}
                     </span>
                   </div>
 
-                  {/* event chips */}
-                  <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
-                    {ev.slice(0,isMobile?2:3).map((e,ei)=>{
+                  {/* event chips — compact */}
+                  <div style={{display:"flex",flexDirection:"column",gap:"1.5px"}}>
+                    {ev.slice(0,2).map((e,ei)=>{
                       const t=TC[e.type];
                       const done=prg(e).pct===100;
+                      const shortTitle = e.title.replace(/^[⭐🇮🇩⚠️]\s*/,"").split("—")[0].trim();
                       return (
                         <div key={ei} style={{
                           background:done?P.raisin3:t.bg,
-                          borderRadius:"3px",padding:isMobile?"1px 4px":"2px 5px",
-                          display:"flex",alignItems:"center",gap:"3px",
-                          opacity:done?0.5:1,
-                          border:e.priority==="high"&&!done?`1px solid ${P.garnet}44`:"1px solid transparent",
+                          borderRadius:"3px",padding:"1px 4px",
+                          display:"flex",alignItems:"center",gap:"2px",
+                          opacity:done?0.45:1,
+                          overflow:"hidden",
                         }}>
                           {e.priority==="high"&&!done&&(
-                            <div style={{width:"3px",height:"3px",borderRadius:"50%",background:P.garnet,flexShrink:0}}/>
+                            <div style={{width:"3px",height:"3px",borderRadius:"50%",
+                              background:P.garnet,flexShrink:0}}/>
                           )}
-                          <span style={{fontSize:isMobile?"8px":"9px",color:P.timber,
-                            fontWeight:"400",lineHeight:"1.3",
-                            overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis",
-                            opacity:done?0.6:1}}>
-                            {e.title.replace(/^[⭐🇮🇩⚠️]\s*/,"")}
+                          <span style={{fontSize:"7.5px",color:P.timber,fontWeight:"400",
+                            lineHeight:"1.4",overflow:"hidden",whiteSpace:"nowrap",
+                            textOverflow:"ellipsis",opacity:done?0.6:1,display:"block",
+                            width:"100%"}}>
+                            {shortTitle}
                           </span>
                         </div>
                       );
                     })}
-                    {ev.length > (isMobile?2:3) && (
-                      <div style={{fontSize:"8px",color:P.grullo,paddingLeft:"4px"}}>
-                        +{ev.length-(isMobile?2:3)} lagi
+                    {ev.length > 2 && (
+                      <div style={{fontSize:"7px",color:P.grullo,paddingLeft:"3px",lineHeight:1.4}}>
+                        +{ev.length-2} lagi
                       </div>
                     )}
                   </div>
 
-                  {/* all done badge */}
-                  {allDone&&<div style={{position:"absolute",top:"4px",right:"4px",
+                  {allDone&&<div style={{position:"absolute",top:"3px",right:"3px",
                     fontSize:"7px",color:P.olive}}>✓</div>}
                 </>}
               </div>
