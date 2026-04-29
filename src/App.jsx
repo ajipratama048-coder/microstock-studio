@@ -1,20 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── PALETTE (dari referensi lo) ─────────────────────────────
-const P = {
-  garnet:   "#792E29",  // urgent / high priority / template
-  raisin:   "#24201D",  // bg utama
-  olive:    "#565538",  // vector / selected
-  grullo:   "#ABA38F",  // secondary text / border
-  timber:   "#D9D4C8",  // primary text / light surface
-  // derived
-  raisin2:  "#2E2924",  // card surface
-  raisin3:  "#342E28",  // elevated card
-  raisin4:  "#3C3530",  // hover
-  garnetBg: "rgba(121,46,41,0.18)",
-  oliveBg:  "rgba(86,85,56,0.22)",
-  grulloBg: "rgba(171,163,143,0.14)",
-  timberBg: "rgba(217,212,200,0.10)",
+// ─── PALETTE ─────────────────────────────────────────────────
+const THEMES = {
+  dark: {
+    garnet:"#792E29", raisin:"#24201D", raisin2:"#2E2924",
+    raisin3:"#342E28", raisin4:"#3C3530", olive:"#565538",
+    grullo:"#ABA38F", timber:"#D9D4C8", toggle:"☀️",
+  },
+  light: {
+    garnet:"#792E29", raisin:"#EDE8DC", raisin2:"#E4DDD0",
+    raisin3:"#D4CCBC", raisin4:"#C8BFA8", olive:"#565538",
+    grullo:"#7A7260", timber:"#24201D", toggle:"🌙",
+  },
 };
 
 const MONTHS = [
@@ -238,7 +235,8 @@ export default function App() {
   const [filt,   setFilt]   = useState("all");
   const [checks, setChecks] = useState({});
   const [open,   setOpen]   = useState(null);
-  const [sheet,  setSheet]  = useState(false); // bottom sheet open
+  const [sheet,  setSheet]  = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const sheetRef = useRef(null);
 
@@ -255,6 +253,8 @@ export default function App() {
     setTimeout(() => document.addEventListener("mousedown", fn), 100);
     return () => document.removeEventListener("mousedown", fn);
   }, [sheet]);
+
+  const P = THEMES[isDark ? "dark" : "light"];
 
   const nav = dir => {
     let m=month+dir, y=year;
@@ -291,7 +291,8 @@ export default function App() {
 
   return (
     <div style={{background:P.raisin,color:P.timber,fontFamily:"'DM Sans',system-ui,sans-serif",
-      height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+      height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden",
+      transition:"background .25s,color .25s"}}>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
@@ -320,9 +321,17 @@ export default function App() {
             </div>
           </div>
           <div style={{display:"flex",gap:"4px",alignItems:"center"}}>
-            <button onClick={()=>nav(-1)} style={{...navBtn}}>‹</button>
-            <button onClick={()=>{setMonth(today.getMonth());setYear(today.getFullYear());setSel(null);setSheet(false);}} style={{...navBtn,fontSize:"16px"}}>○</button>
-            <button onClick={()=>nav(1)} style={{...navBtn}}>›</button>
+            <button onClick={()=>nav(-1)} style={{...navBtn(P)}}>‹</button>
+            <button onClick={()=>{setMonth(today.getMonth());setYear(today.getFullYear());setSel(null);setSheet(false);}} style={{...navBtn(P),fontSize:"16px"}}>○</button>
+            <button onClick={()=>nav(1)} style={{...navBtn(P)}}>›</button>
+            <div style={{width:"1px",height:"18px",background:P.raisin3,margin:"0 2px"}}/>
+            <button onClick={()=>setIsDark(d=>!d)}
+              style={{width:"30px",height:"30px",borderRadius:"50%",cursor:"pointer",
+                border:`1px solid ${P.raisin3}`,background:P.raisin2,
+                fontSize:"14px",display:"flex",alignItems:"center",justifyContent:"center",
+                transition:"all .2s"}}>
+              {P.toggle}
+            </button>
           </div>
         </div>
 
@@ -622,11 +631,11 @@ export default function App() {
   );
 }
 
-// nav button style
-const navBtn = {
+// nav button style — takes P so it's theme-aware
+const navBtn = P => ({
   width:"30px",height:"30px",borderRadius:"8px",
   border:`1px solid ${P.raisin3}`,background:"transparent",
   color:P.grullo,cursor:"pointer",fontSize:"16px",
   display:"flex",alignItems:"center",justifyContent:"center",
   transition:"all .15s"
-};
+});
